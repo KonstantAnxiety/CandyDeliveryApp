@@ -60,16 +60,39 @@ class CourierAPIView(generics.ListCreateAPIView):
         return JsonResponse({'validation_error': {'couriers': errors}}, status=400)
 
 
-class CourierDetailAPIView(generics.UpdateAPIView):
+class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
     queryset = Courier.objects.all()
     serializer_class = CourierSerializer
 
     def get(self, request, *args, **kwargs):
         pk = kwargs['pk']
         if not Courier.objects.filter(courier_id=pk):
-            return HttpResponseBadRequest(content='Courier not found')
-        courier = CourierSerializer(instance=Courier.objects.get(courier_id=pk)).data
-        return JsonResponse(courier)
+            return JsonResponse(data={'error': 'Courier not found'}, status=400)
+        courier = Courier.objects.get(courier_id=pk)
+        courier_detail = CourierSerializer(instance=courier).data
+        regions = CourierRegions.objects.filter(courier_id=courier)
+        completed_orders = Order.objects.filter(courier_id=courier,
+                                                complete_time__isnull=False)
+        min_avg_region_time = 60*60
+        for region in regions:
+            region_orders = [item for item in completed_orders if item.region == region.region]
+            num_region_time = len(region_orders)
+            if not num_region_time:
+                continue
+            sum_region_time = 0
+            for index, order in enumerate(region_orders):
+                if index + 1 < num_region_time:
+                    sum_region_time += (order.complete_time - region_orders[index+1]).total_seconds()
+                else:
+                    sum_region_time += (order.complete_time - order.assign_time).total_seconds()
+            avg_region_time = sum_region_time / num_region_time
+            if avg_region_time < min_avg_region_time:
+                min_avg_region_time = avg_region_time
+        if completed_orders:
+            courier_detail['rating'] = (60*60 - min_avg_region_time)/60/60 * 5
+
+        courier_detail['earnings'] = 500 * sum([item.courier_type.earnings_coef for item in completed_orders])
+        return JsonResponse(data=courier_detail, status=200)
 
     def partial_update(self, request, *args, **kwargs):
         # TODO reassign orders according to new working_hours
@@ -77,12 +100,12 @@ class CourierDetailAPIView(generics.UpdateAPIView):
         patch_data = request.data
         patch_data['courier_id'] = pk
         if not Courier.objects.filter(courier_id=pk):
-            return HttpResponseBadRequest(content='Courier not found')
+            return JsonResponse(data={'error': 'Courier not found'}, status=400)
         courier = Courier.objects.get(courier_id=pk)
         validation = CourierSerializer(data=patch_data, partial=True, instance=courier)
         if validation.is_valid():
             validation.update(courier, validation.validated_data)
-            return self.get(self, pk=pk)
+            return JsonResponse(data=validation.data, status=200)
         return JsonResponse({'validation_error': {'couriers': validation.errors}}, status=400)
 
 

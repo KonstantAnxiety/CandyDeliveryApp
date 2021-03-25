@@ -254,6 +254,7 @@ class OrderAssignSerializer(ModelSerializer):
                 if order.courier_id is None:
                     order.courier_id = courier_obj
                     order.assign_time = current_time
+                    order.courier_type = courier_obj.courier_type
                     order.save()
         response = {'orders': [{'id': order.order_id} for order in nice_orders]}
         if len(nice_orders):

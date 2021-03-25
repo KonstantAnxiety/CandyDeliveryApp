@@ -32,6 +32,9 @@ class CourierRegions(models.Model):
 	
 	
 class Order(models.Model):
+	class Meta:
+		ordering = ['-complete_time']
+
 	order_id = models.IntegerField(primary_key=True)
 	courier_id = models.ForeignKey(Courier, on_delete=models.CASCADE, null=True)
 	weight = models.DecimalField(max_digits=4, decimal_places=2, default=1,
@@ -39,6 +42,7 @@ class Order(models.Model):
 	region = models.IntegerField(validators=[MinValueValidator(1)])
 	assign_time = models.DateTimeField(null=True)
 	complete_time = models.DateTimeField(null=True)
+	courier_type = models.ForeignKey(CourierType, on_delete=models.CASCADE, null=True)
 
 	# def display_assign_time(self):
 	# 	return 'asdf' + str(self.assign_time)[:-3]+'Z'
