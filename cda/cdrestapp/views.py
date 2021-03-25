@@ -5,17 +5,6 @@ from .models import CourierType, CourierRegions, Courier, Order
 from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
                          OrderSerializer, CourierSerializer, OrderAssignSerializer, OrderCompleteSerializer
 
-from django.views.decorators.http import require_http_methods
-
-
-@require_http_methods(["GET"])
-def my_view(request):
-    a = json.loads(request.body)
-    if a['password'] == 'b253bfa1cf9e70873ff40d783346835bf8592a20':
-        return HttpResponse('#', status=200)
-    return HttpResponse('*', status=200)
-    # return HttpResponse(request, status=200)
-
 
 class CourierTypeAPIView(generics.ListCreateAPIView):
     # TODO remove this ???
@@ -123,9 +112,6 @@ class OrderAPIView(generics.ListCreateAPIView):
 
 class OrderAssignAPIView(generics.CreateAPIView):
     serializer_class = OrderAssignSerializer
-
-    # def get(self, request, *args, **kwargs):
-    #     return HttpResponse('nice')
 
     def post(self, request, *args, **kwargs):
         validation = OrderAssignSerializer(data=request.data)

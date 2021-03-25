@@ -26,6 +26,5 @@ urlpatterns = [
 	path('orders', views.OrderAPIView.as_view(), name='orders-list'),
 	path(r'regions', views.CourierRegionsAPIView.as_view(), name='courier-regions-list'),
 	path(r'orders/assign', views.OrderAssignAPIView.as_view(), name='order-assign'),
-	path(r'orders/complete', views.OrderCompleteAPIView.as_view(), name='order-assign'),
-	path(r'test', views.my_view, name='test-name'),
+	path(r'orders/complete', views.OrderCompleteAPIView.as_view(), name='order-complete'),
 ]

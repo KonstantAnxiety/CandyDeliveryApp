@@ -158,6 +158,7 @@ class CourierSerializer(ModelSerializer):
         orders = Order.objects.filter(courier_id=instance, complete_time__isnull=True)
         working_hours = WorkingHours.objects.filter(courier_id=instance)
         # TODO write a funny comment about how awful this section is (⊙_⊙;)
+        # TODO create function
         for order in orders:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
             nice = False
