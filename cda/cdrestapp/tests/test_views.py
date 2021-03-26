@@ -28,6 +28,14 @@ class GetPostPatchCouriersTest(TestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_get_valid_courier_details(self):
+        response = client.get(reverse('courier-detail', kwargs={'pk': 1}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_get_invalid_courier_details(self):
+        response = client.get(reverse('courier-detail', kwargs={'pk': 0}))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_post_valid_couriers(self):
         response = client.post(path=reverse('couriers-list'),
                                data=valid_couriers,
@@ -110,11 +118,9 @@ class CompleteOrderTest(TestCase):
                                       data=valid_assign,
                                       content_type='application/json')
         assigned_orders = json.loads(response_assign.content)['orders']
-        print(assigned_orders)
         response_complete = client.post(path=reverse('order-complete'),
                                         data=valid_complete,
                                         content_type='application/json')
-        print(response_complete.content)
         self.assertEqual(response_complete.status_code, status.HTTP_200_OK)
 
     # def test_assign_invalid(self):

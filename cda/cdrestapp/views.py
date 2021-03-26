@@ -6,7 +6,7 @@ from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
                          OrderSerializer, CourierSerializer, OrderAssignSerializer, OrderCompleteSerializer
 
 
-class CourierTypeAPIView(generics.ListCreateAPIView):
+class CourierTypeAPIView(generics.ListCreateAPIView):  # pragma: no cover
     # TODO remove this ???
     queryset = CourierType.objects.all()
     serializer_class = CourierTypeSerializer

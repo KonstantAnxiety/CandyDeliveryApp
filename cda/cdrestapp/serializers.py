@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timezone
 from .models import CourierType, CourierRegions, Courier, \
     Order, WorkingHours, DeliveryHours
-from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER
+from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
 from decimal import Decimal
 
 # TODO docstrings
@@ -161,17 +161,9 @@ class CourierSerializer(ModelSerializer):
         # TODO create function
         for order in orders:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
-            nice = False
-            if Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and order.region in regions:
-                for dh in delivery_hours:
-                    for wh in working_hours:
-                        if dh.delivery_start <= wh.work_start <= dh.delivery_end or \
-                                wh.work_start <= dh.delivery_start <= wh.work_end:
-                            nice = True
-                            break
-                    if nice:
-                        break
-            if not nice:
+            if not (Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and \
+                    order.region in regions and \
+                    work_delivery_intersect(working_hours, delivery_hours)):
                 order.courier_id = None
                 order.assign_time = None
                 order.save()
@@ -205,7 +197,6 @@ class OrderSerializer(ModelSerializer):
             new_dh.save()
 
     def create(self, validated_data):
-        print(validated_data)
         new_order = Order(order_id=validated_data['order_id'],
                           weight=validated_data['weight'],
                           region=validated_data['region'])
@@ -240,15 +231,7 @@ class OrderAssignSerializer(ModelSerializer):
         for order in orders:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
             nice = False
-            for dh in delivery_hours:
-                for wh in working_hours:
-                    if dh.delivery_start <= wh.work_start <= dh.delivery_end or \
-                            wh.work_start <= dh.delivery_start <= wh.work_end:
-                        nice = True
-                        break
-                if nice:
-                    break
-            if nice:
+            if work_delivery_intersect(working_hours, delivery_hours):
                 nice_orders.append(order)
                 # TODO F() notation ?
                 if order.courier_id is None:
@@ -275,7 +258,6 @@ class OrderCompleteSerializer(ModelSerializer):
                         'complete_time': {'required': True}}
 
     def create(self, validated_data):
-        print(validated_data)
         order_obj = Order.objects.get(order_id=validated_data['order_id'])
         order_obj.complete_time = validated_data['complete_time']
         order_obj.save()
