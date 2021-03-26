@@ -161,11 +161,12 @@ class CourierSerializer(ModelSerializer):
         # TODO create function
         for order in orders:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
-            if not (Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and \
-                    order.region in regions and \
+            if not (Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and
+                    order.region in regions and
                     work_delivery_intersect(working_hours, delivery_hours)):
                 order.courier_id = None
                 order.assign_time = None
+                order.courier_type = None
                 order.save()
         return instance
 
