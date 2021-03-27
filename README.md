@@ -1,3 +1,3 @@
 # CandyDeliveryAPI
 
-![DB diagram](https://user-images.githubusercontent.com/58992437/112394368-a5c25600-8d0d-11eb-9f80-41b92ec106dc.png)
+![DB diagram](https://user-images.githubusercontent.com/58992437/112719825-00c19c00-8f0c-11eb-93be-bd09d6a8e503.png)
