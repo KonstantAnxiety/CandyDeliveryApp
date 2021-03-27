@@ -95,7 +95,6 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         return JsonResponse(data=courier_detail, status=200)
 
     def partial_update(self, request, *args, **kwargs):
-        # TODO reassign orders according to new working_hours
         pk = kwargs['pk']
         patch_data = request.data
         patch_data['courier_id'] = pk
@@ -114,7 +113,8 @@ class OrderAPIView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
 
     def post(self, request, *args, **kwargs):
-        # TODO check if there is data in the request ?
+        if 'data' not in request.data.keys():
+            JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
         validation = OrderSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()
@@ -123,7 +123,6 @@ class OrderAPIView(generics.ListCreateAPIView):
         validation_errors = [i for i in validation.errors if i]
         errors = []
         for index, error in enumerate(validation.errors):
-            # print(index, error)
             if error:
                 new_error = error
                 new_error['id'] = validation.initial_data[index]['order_id']

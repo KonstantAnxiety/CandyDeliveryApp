@@ -39,7 +39,15 @@ invalid_couriers = {
 }
 
 valid_courier_patch = {
-    "regions": [11, 33, 2]
+    "regions": [11, 33, 2],
+    "courier_type": "car",
+    "working_hours": ["11:35-14:05", "09:00-11:00"]
+}
+
+invalid_courier_patch = {
+    "regions": [-1, 0, 1],
+    "courier_type": "BAD_TYPE",
+    "working_hours": [1230, "09:00"]
 }
 
 valid_orders = {
@@ -99,4 +107,11 @@ valid_complete = {
     "courier_id": 1,
     "order_id": 3,
     "complete_time": "2021-01-10T10:33:01.42Z"
+}
+
+invalid_complete = {
+    "courier_id": 0,
+    "order_id": "2",
+    "complete_time": "According to all known laws of aviation,"
+                     "there is no way a bee should be able to fly."
 }

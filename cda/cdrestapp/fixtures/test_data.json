@@ -181,6 +181,18 @@
         }
     },
     {
+        "model":"cdrestapp.order",
+        "pk":4,
+        "fields":{
+            "courier_id":null,
+            "weight":"0.01",
+            "region":22,
+            "assign_time":null,
+            "complete_time":null,
+            "courier_type":null
+        }
+    },
+    {
         "model":"cdrestapp.deliveryhours",
         "pk":1,
         "fields":{
@@ -214,6 +226,15 @@
             "order_id":3,
             "delivery_start":"16:00:00",
             "delivery_end":"21:30:00"
+        }
+    },
+    {
+        "model":"cdrestapp.deliveryhours",
+        "pk":5,
+        "fields":{
+            "order_id":4,
+            "delivery_start":"00:00:00",
+            "delivery_end":"23:59:59"
         }
     }
 ]

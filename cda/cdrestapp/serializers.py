@@ -7,13 +7,6 @@ from .models import CourierType, CourierRegions, Courier, \
 from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
 from decimal import Decimal
 
-# TODO docstrings
-# TODO tests
-# TODO pylint
-# TODO more tests
-# TODO test rating
-# TODO docker ?
-
 
 class CourierTypeSerializer(ModelSerializer):
     class Meta:
@@ -161,7 +154,6 @@ class CourierSerializer(ModelSerializer):
         orders = Order.objects.filter(courier_id=instance, complete_time__isnull=True)
         working_hours = WorkingHours.objects.filter(courier_id=instance)
         # TODO write a funny comment about how awful this section is (⊙_⊙;)
-        # TODO create function
         for order in orders:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
             if not (Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and
