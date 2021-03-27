@@ -10,6 +10,9 @@ from decimal import Decimal
 # TODO docstrings
 # TODO tests
 # TODO pylint
+# TODO more tests
+# TODO test rating
+# TODO docker ?
 
 
 class CourierTypeSerializer(ModelSerializer):

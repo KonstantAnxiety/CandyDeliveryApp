@@ -44,9 +44,6 @@ class Order(models.Model):
 	complete_time = models.DateTimeField(null=True)
 	courier_type = models.ForeignKey(CourierType, on_delete=models.CASCADE, null=True)
 
-	# def display_assign_time(self):
-	# 	return 'asdf' + str(self.assign_time)[:-3]+'Z'
-
 
 class DeliveryHours(models.Model):
 	order_id = models.ForeignKey(Order, related_name='delivery_hours', on_delete=models.CASCADE)

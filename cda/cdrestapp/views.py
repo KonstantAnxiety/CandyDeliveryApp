@@ -67,7 +67,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
     def get(self, request, *args, **kwargs):
         pk = kwargs['pk']
         if not Courier.objects.filter(courier_id=pk):
-            return JsonResponse(data={'error': 'Courier not found'}, status=400)
+            return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         courier_detail = CourierSerializer(instance=courier).data
         regions = CourierRegions.objects.filter(courier_id=courier)
@@ -100,7 +100,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         patch_data = request.data
         patch_data['courier_id'] = pk
         if not Courier.objects.filter(courier_id=pk):
-            return JsonResponse(data={'error': 'Courier not found'}, status=400)
+            return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         validation = CourierSerializer(data=patch_data, partial=True, instance=courier)
         if validation.is_valid():
@@ -137,22 +137,21 @@ class OrderAssignAPIView(generics.CreateAPIView):
     serializer_class = OrderAssignSerializer
 
     def post(self, request, *args, **kwargs):
+        if "courier_id" not in request.data.keys():
+            return JsonResponse({'courier_id': 'This field is required.'}, status=400)
         validation = OrderAssignSerializer(data=request.data)
         if validation.is_valid():
             assigned_orders = validation.save()
             return JsonResponse(assigned_orders, status=200)
-        return JsonResponse({'validation_errors': validation.errors}, status=400)
+        return JsonResponse({'validation_error': validation.errors}, status=400)
 
 
 class OrderCompleteAPIView(generics.CreateAPIView):
     serializer_class = OrderCompleteSerializer
-
-    # def get(self, request, *args, **kwargs):
-    #     return HttpResponse('nice')
 
     def post(self, request, *args, **kwargs):
         validation = OrderCompleteSerializer(data=request.data)
         if validation.is_valid():
             assigned_orders = validation.save()
             return JsonResponse(assigned_orders, status=200)
-        return JsonResponse({'validation_errors': validation.errors}, status=400)
+        return JsonResponse({'validation_error': validation.errors}, status=400)

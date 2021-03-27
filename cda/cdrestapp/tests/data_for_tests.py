@@ -1,4 +1,4 @@
-valid_couriers = post_data = {
+valid_couriers = {
     "data": [
         {
             "courier_id": 4,
@@ -88,7 +88,7 @@ invalid_orders = {
 }
 
 valid_assign = {
-    "courier_id": 4
+    "courier_id": 1
 }
 
 invalid_assign = {
@@ -96,7 +96,7 @@ invalid_assign = {
 }
 
 valid_complete = {
-    "courier_id": 4,
+    "courier_id": 1,
     "order_id": 3,
     "complete_time": "2021-01-10T10:33:01.42Z"
 }

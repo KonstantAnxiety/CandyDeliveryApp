@@ -1,0 +1,26 @@
+[
+    {
+        "model": "cdrestapp.couriertype",
+        "pk": "bike",
+        "fields": {
+            "capacity": 15,
+            "earnings_coef": 5
+        }
+    },
+    {
+        "model": "cdrestapp.couriertype",
+        "pk": "car",
+        "fields": {
+            "capacity": 50,
+            "earnings_coef": 9
+        }
+    },
+    {
+        "model": "cdrestapp.couriertype",
+        "pk": "foot",
+        "fields": {
+            "capacity": 10,
+            "earnings_coef": 2
+        }
+    }
+]
