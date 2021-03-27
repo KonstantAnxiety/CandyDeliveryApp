@@ -5,8 +5,8 @@ from decimal import Decimal
 
 class CourierType(models.Model):
 	courier_type = models.CharField(primary_key=True, max_length=20)
-	capacity = models.IntegerField()
-	earnings_coef = models.IntegerField()
+	capacity = models.IntegerField(validators=[MinValueValidator(0)])
+	earnings_coef = models.IntegerField(validators=[MinValueValidator(0)])
 	
 	
 class Courier(models.Model):

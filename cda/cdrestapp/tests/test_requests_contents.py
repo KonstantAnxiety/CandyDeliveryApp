@@ -1,3 +1,15 @@
+valid_courier_type = {
+    "courier_type": "scooter",
+    "capacity": 15,
+    "earnings_coef": 7
+}
+
+invalid_courier_type = {
+    "courier_type": "robot",
+    "capacity": -1,
+    "earnings_coef": -1
+}
+
 valid_couriers = {
     "data": [
         {

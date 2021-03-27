@@ -2,13 +2,34 @@ import json
 from rest_framework import status
 from django.test import TestCase, Client
 from django.urls import reverse
-from ..models import Courier, Order
-from ..serializers import CourierSerializer, OrderSerializer
+from ..models import Courier, Order, CourierType
+from ..serializers import CourierSerializer, OrderSerializer, CourierRegionsSerializer
 from .test_requests_contents import valid_couriers, invalid_couriers, \
-    valid_courier_patch, valid_orders, invalid_orders, valid_assign,\
-    invalid_assign, valid_complete, invalid_courier_patch, invalid_complete
+    valid_courier_patch, valid_orders, invalid_orders, valid_assign, \
+    invalid_assign, valid_complete, invalid_courier_patch, invalid_complete, valid_courier_type, invalid_courier_type
 
 client = Client()
+
+
+class GetPostCourierTypesTest(TestCase):
+    def test_get_all_courier_types(self):
+        response = client.get(reverse('courier-types-list'))
+        courier_types = CourierType.objects.all()
+        serializer = CourierRegionsSerializer(courier_types, many=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+
+    def test_post_valid_courier_type(self):
+        response = client.post(path=reverse('courier-types-list'),
+                               data=valid_courier_type,
+                               content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_post_invalid_courier_type(self):
+        response = client.post(path=reverse('courier-types-list'),
+                               data=invalid_courier_type,
+                               content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class GetPostPatchCouriersTest(TestCase):
@@ -18,8 +39,8 @@ class GetPostPatchCouriersTest(TestCase):
         response = client.get(reverse('couriers-list'))
         couriers = Courier.objects.all()
         serializer = CourierSerializer(couriers, many=True)
-        self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
 
     def test_get_valid_courier_details_no_rating(self):
         response = client.get(reverse('courier-detail', kwargs={'pk': 3}))

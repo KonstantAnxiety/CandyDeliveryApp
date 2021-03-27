@@ -6,28 +6,16 @@ from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
                          OrderSerializer, CourierSerializer, OrderAssignSerializer, OrderCompleteSerializer
 
 
-class CourierTypeAPIView(generics.ListCreateAPIView):  # pragma: no cover
-    # TODO remove this ???
+class CourierTypeAPIView(generics.ListCreateAPIView):
     queryset = CourierType.objects.all()
     serializer_class = CourierTypeSerializer
 
     def post(self, request, *args, **kwargs):
-        # TODO check if courier_type is in CHOICES
-        post_data = request.data
-        valid = True
-        invalid_ids = []
-        for index, item in enumerate(post_data):
-            if not (item['capacity'].isdigit() and 1e-2 <= float(item['capacity']) <= 50):
-                invalid_ids.append(index)
-                valid = False
-        if not valid:
-            return JsonResponse(status=400, data=invalid_ids)
-        for item in post_data:
-            new_item = CourierType(courier_type=item['courier_type'],
-                                   capacity=item['capacity'],
-                                   earnings_coef=item['earnings_coef'])
-            new_item.save()
-        return HttpResponse(json.dumps(post_data), content_type='application/json')
+        validation = CourierTypeSerializer(data=request.data)
+        if validation.is_valid():
+            validation.save()
+            return JsonResponse(validation.validated_data, status=201)
+        return JsonResponse({'validation_error': validation.errors}, status=400)
 
 
 class CourierRegionsAPIView(generics.ListCreateAPIView):
@@ -40,7 +28,8 @@ class CourierAPIView(generics.ListCreateAPIView):
     serializer_class = CourierSerializer
 
     def post(self, request, *args, **kwargs):
-        # TODO check if there is data in the request ?
+        if 'data' not in request.data.keys():
+            JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
         validation = CourierSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()

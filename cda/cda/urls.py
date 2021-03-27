@@ -20,11 +20,10 @@ from cdrestapp import views
 # TODO names ?
 urlpatterns = [
 	path('admin/', admin.site.urls),
-	path(r'courier-type', views.CourierTypeAPIView.as_view(), name='courier-types-list'),  # TODO fix this
+	path(r'courier-types', views.CourierTypeAPIView.as_view(), name='courier-types-list'),
 	path(r'couriers', views.CourierAPIView.as_view(), name='couriers-list'),
 	re_path(r'^couriers/(?P<pk>\d+)$', views.CourierDetailAPIView.as_view(), name='courier-detail'),
 	path('orders', views.OrderAPIView.as_view(), name='orders-list'),
-	path(r'regions', views.CourierRegionsAPIView.as_view(), name='courier-regions-list'),
 	path(r'orders/assign', views.OrderAssignAPIView.as_view(), name='order-assign'),
 	path(r'orders/complete', views.OrderCompleteAPIView.as_view(), name='order-complete'),
 ]
