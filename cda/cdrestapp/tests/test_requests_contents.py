@@ -65,19 +65,19 @@ invalid_courier_patch = {
 valid_orders = {
     "data": [
         {
-            "order_id": 1,
+            "order_id": 8,
             "weight": 50,
             "region": 12,
             "delivery_hours": ["09:00-18:00"]
         },
         {
-            "order_id": 2,
+            "order_id": 9,
             "weight": 15,
             "region": 1,
             "delivery_hours": ["09:00-18:00"]
         },
         {
-            "order_id": 3,
+            "order_id": 10,
             "weight": 0.01,
             "region": 22,
             "delivery_hours": ["09:00-12:00", "16:00-21:30"]
@@ -88,27 +88,31 @@ valid_orders = {
 invalid_orders = {
     "data": [
         {
-            "order_id": 4,
+            "order_id": 1.2,
             "weight": 50,
             "region": 0,
             "delivery_hours": []
         },
         {
-            "order_id": 5,
+            "order_id": -1.2,
             "weight": 15,
             "region": -1,
             "delivery_hours": ["INVALID_TIME_FORMAT"]
         },
         {
-            "order_id": 6,
+            "order_id": 0,
             "weight": 0.01,
             "region": 22
         }
     ]
 }
 
-valid_assign = {
+valid_assign_one = {
     "courier_id": 1
+}
+
+valid_assign_two = {
+    "courier_id": 2
 }
 
 invalid_assign = {
@@ -117,8 +121,8 @@ invalid_assign = {
 
 valid_complete = {
     "courier_id": 1,
-    "order_id": 3,
-    "complete_time": "2021-01-10T10:33:01.42Z"
+    "order_id": 1,
+    "complete_time": "2021-03-28T14:18:33.19Z"
 }
 
 invalid_complete = {

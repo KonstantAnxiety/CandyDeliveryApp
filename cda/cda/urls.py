@@ -10,6 +10,4 @@ urlpatterns = [
 	re_path(r'^orders/assign', views.OrderAssignAPIView.as_view(), name='order-assign'),
 	re_path(r'^orders', views.OrderAPIView.as_view(), name='orders-list'),
 	re_path(r'^courier-types', views.CourierTypeAPIView.as_view(), name='courier-types-list'),
-
-
 ]

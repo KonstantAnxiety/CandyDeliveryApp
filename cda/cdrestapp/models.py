@@ -12,6 +12,7 @@ class CourierType(models.Model):
 class Courier(models.Model):
 	courier_id = models.IntegerField(primary_key=True)
 	courier_type = models.ForeignKey(CourierType, on_delete=models.CASCADE)
+	earnings = models.IntegerField(default=0)
 
 
 class WorkingHours(models.Model):
@@ -27,16 +28,18 @@ class CourierRegions(models.Model):
 	
 class Order(models.Model):
 	class Meta:
-		ordering = ['-complete_time']
+		ordering = ['-complete_time', 'weight']
 
 	order_id = models.IntegerField(primary_key=True)
 	courier_id = models.ForeignKey(Courier, on_delete=models.CASCADE, null=True)
+	# TODO max_digits ?
 	weight = models.DecimalField(max_digits=4, decimal_places=2, default=1,
 								 validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('50'))])
 	region = models.IntegerField(validators=[MinValueValidator(1)])
 	assign_time = models.DateTimeField(null=True)
 	complete_time = models.DateTimeField(null=True)
 	courier_type = models.ForeignKey(CourierType, on_delete=models.CASCADE, null=True)
+	delivery_complete = models.BooleanField(null=True)
 
 
 class DeliveryHours(models.Model):

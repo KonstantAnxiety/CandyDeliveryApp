@@ -27,21 +27,16 @@
         "model":"cdrestapp.courier",
         "pk":1,
         "fields":{
-            "courier_type":"foot"
+            "courier_type":"car",
+            "earnings":7000
         }
     },
     {
         "model":"cdrestapp.courier",
         "pk":2,
         "fields":{
-            "courier_type":"bike"
-        }
-    },
-    {
-        "model":"cdrestapp.courier",
-        "pk":3,
-        "fields":{
-            "courier_type":"car"
+            "courier_type":"bike",
+            "earnings":0
         }
     },
     {
@@ -49,22 +44,13 @@
         "pk":1,
         "fields":{
             "courier_id":1,
-            "work_start":"11:35:00",
-            "work_end":"14:05:00"
+            "work_start":"10:00:00",
+            "work_end":"16:00:00"
         }
     },
     {
         "model":"cdrestapp.workinghours",
         "pk":2,
-        "fields":{
-            "courier_id":1,
-            "work_start":"09:00:00",
-            "work_end":"11:00:00"
-        }
-    },
-    {
-        "model":"cdrestapp.workinghours",
-        "pk":3,
         "fields":{
             "courier_id":2,
             "work_start":"09:00:00",
@@ -73,11 +59,11 @@
     },
     {
         "model":"cdrestapp.workinghours",
-        "pk":4,
+        "pk":2,
         "fields":{
-            "courier_id":3,
-            "work_start":"00:00:00",
-            "work_end":"15:00:00"
+            "courier_id":2,
+            "work_start":"01:11:00",
+            "work_end":"01:12:00"
         }
     },
     {
@@ -113,90 +99,75 @@
         }
     },
     {
-        "model":"cdrestapp.courierregions",
-        "pk":5,
+        "model":"cdrestapp.order",
+        "pk":1,
         "fields":{
-            "courier_id":3,
-            "region":12
-        }
-    },
-    {
-        "model":"cdrestapp.courierregions",
-        "pk":6,
-        "fields":{
-            "courier_id":3,
-            "region":22
-        }
-    },
-    {
-        "model":"cdrestapp.courierregions",
-        "pk":7,
-        "fields":{
-            "courier_id":3,
-            "region":23
-        }
-    },
-    {
-        "model":"cdrestapp.courierregions",
-        "pk":8,
-        "fields":{
-            "courier_id":3,
-            "region":33
+            "courier_id":1,
+            "weight":"42.00",
+            "region":1,
+            "assign_time":"2021-03-28T14:17:33.193Z",
+            "complete_time":null,
+            "courier_type":"car",
+            "delivery_complete":false
         }
     },
     {
         "model":"cdrestapp.order",
-        "pk":1,
+        "pk":2,
+        "fields":{
+            "courier_id":null,
+            "weight":"10.00",
+            "region":22,
+            "assign_time":null,
+            "complete_time":null,
+            "courier_type":null,
+            "delivery_complete":null
+        }
+    },
+    {
+        "model":"cdrestapp.order",
+        "pk":5,
         "fields":{
             "courier_id":1,
             "weight":"0.23",
             "region":12,
-            "assign_time":"2021-03-27T11:31:03.478Z",
-            "complete_time":"2021-03-27T14:35:00Z",
-            "courier_type":"foot"
+            "assign_time":"2021-03-28T14:11:23.560Z",
+            "complete_time":"2021-03-28T14:11:53.560Z",
+            "courier_type":"car",
+            "delivery_complete":true
         }
     },
     {
         "model":"cdrestapp.order",
-        "pk":2,
-        "fields":{
-            "courier_id":null,
-            "weight":"15.00",
-            "region":1,
-            "assign_time":null,
-            "complete_time":null,
-            "courier_type":null
-        }
-    },
-    {
-        "model":"cdrestapp.order",
-        "pk":3,
+        "pk":6,
         "fields":{
             "courier_id":1,
-            "weight":"0.01",
-            "region":22,
-            "assign_time":"2021-03-27T11:31:03.478Z",
-            "complete_time":null,
-            "courier_type":"foot"
+            "weight":"15.00",
+            "region":1,
+            "assign_time":"2021-03-28T14:15:43.524Z",
+            "complete_time":"2021-03-28T14:16:43.520Z",
+            "courier_type":"bike",
+            "delivery_complete":true
         }
     },
     {
         "model":"cdrestapp.order",
-        "pk":4,
+        "pk":7,
         "fields":{
-            "courier_id":null,
-            "weight":"0.01",
+            "courier_id":1,
+            "weight":"15.00",
             "region":22,
-            "assign_time":null,
-            "complete_time":null,
-            "courier_type":null
+            "assign_time":"2021-03-28T14:11:23.560Z",
+            "complete_time":"2021-03-28T14:12:53.560Z",
+            "courier_type":"car",
+            "delivery_complete":true
         }
     },
     {
         "model":"cdrestapp.deliveryhours",
         "pk":1,
         "fields":{
-            "order_id":1,
+            "order_id":5,
             "delivery_start":"09:00:00",
             "delivery_end":"18:00:00"
         }
@@ -205,7 +176,7 @@
         "model":"cdrestapp.deliveryhours",
         "pk":2,
         "fields":{
-            "order_id":2,
+            "order_id":6,
             "delivery_start":"09:00:00",
             "delivery_end":"18:00:00"
         }
@@ -214,7 +185,7 @@
         "model":"cdrestapp.deliveryhours",
         "pk":3,
         "fields":{
-            "order_id":3,
+            "order_id":7,
             "delivery_start":"09:00:00",
             "delivery_end":"12:00:00"
         }
@@ -223,7 +194,7 @@
         "model":"cdrestapp.deliveryhours",
         "pk":4,
         "fields":{
-            "order_id":3,
+            "order_id":7,
             "delivery_start":"16:00:00",
             "delivery_end":"21:30:00"
         }
@@ -232,9 +203,27 @@
         "model":"cdrestapp.deliveryhours",
         "pk":5,
         "fields":{
-            "order_id":4,
-            "delivery_start":"00:00:00",
-            "delivery_end":"23:59:59"
+            "order_id":1,
+            "delivery_start":"09:00:00",
+            "delivery_end":"18:00:00"
+        }
+    },
+    {
+        "model":"cdrestapp.deliveryhours",
+        "pk":6,
+        "fields":{
+            "order_id":2,
+            "delivery_start":"01:11:00",
+            "delivery_end":"02:22:00"
+        }
+    },
+    {
+        "model":"cdrestapp.deliveryhours",
+        "pk":7,
+        "fields":{
+            "order_id":2,
+            "delivery_start":"22:22:00",
+            "delivery_end":"23:23:00"
         }
     }
 ]

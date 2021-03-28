@@ -1,6 +1,9 @@
 import json
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.db.models import Min
 from rest_framework import generics
+from rest_framework.settings import api_settings
+
 from .models import CourierType, CourierRegions, Courier, Order
 from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
                          OrderSerializer, CourierSerializer, OrderAssignSerializer, OrderCompleteSerializer
@@ -30,6 +33,10 @@ class CourierAPIView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
+        unknown = set(request.data.keys()) - {'data'}
+        if unknown:
+            errors = ["Unknown field: {}".format(f) for f in unknown]
+            return JsonResponse({'validation_error': {api_settings.NON_FIELD_ERRORS_KEY: errors}}, status=400)
         validation = CourierSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()
@@ -37,7 +44,6 @@ class CourierAPIView(generics.ListCreateAPIView):
                                 status=201)
         errors = []
         for index, error in enumerate(validation.errors):
-            # print(index, error)
             if error:
                 new_error = error
                 new_error['id'] = validation.initial_data[index]['courier_id']
@@ -61,26 +67,33 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         courier_detail = CourierSerializer(instance=courier).data
         regions = CourierRegions.objects.filter(courier_id=courier)
         completed_orders = Order.objects.filter(courier_id=courier,
-                                                complete_time__isnull=False)
+                                                delivery_complete=True)
         min_avg_region_time = 60*60
         for region in regions:
-            region_orders = [item for item in completed_orders if item.region == region.region]
+            region_orders = completed_orders.filter(region=region.region)
             num_region_time = len(region_orders)
             if not num_region_time:
                 continue
             sum_region_time = 0
-            for index, order in enumerate(region_orders):
-                if index + 1 < num_region_time:
-                    sum_region_time += (order.complete_time - region_orders[index+1]).total_seconds()
-                else:
+            for order in region_orders:
+                current_delivery = Order.objects.filter(assign_time=order.assign_time).order_by('-complete_time')
+                index_in_delivery = 0
+                for index, find_order in enumerate(current_delivery):
+                    if find_order.order_id == order.order_id:
+                        index_in_delivery = index
+                        break
+                if index_in_delivery == len(current_delivery) - 1:
                     sum_region_time += (order.complete_time - order.assign_time).total_seconds()
+                else:
+                    delta = (order.complete_time - current_delivery[index_in_delivery + 1].complete_time)
+                    sum_region_time += delta.total_seconds()
             avg_region_time = sum_region_time / num_region_time
             if avg_region_time < min_avg_region_time:
                 min_avg_region_time = avg_region_time
         if completed_orders:
-            courier_detail['rating'] = (60*60 - min_avg_region_time)/60/60 * 5
+            courier_detail['rating'] = round((60*60 - min_avg_region_time)/60/60 * 5, 2)
 
-        courier_detail['earnings'] = 500 * sum([item.courier_type.earnings_coef for item in completed_orders])
+        courier_detail['earnings'] = courier.earnings
         return JsonResponse(data=courier_detail, status=200)
 
     def partial_update(self, request, *args, **kwargs):
@@ -104,6 +117,10 @@ class OrderAPIView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
+        unknown = set(request.data.keys()) - {'data'}
+        if unknown:
+            errors = ["Unknown field: {}".format(f) for f in unknown]
+            return JsonResponse({'validation_error': {api_settings.NON_FIELD_ERRORS_KEY: errors}}, status=400)
         validation = OrderSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()
@@ -125,7 +142,7 @@ class OrderAssignAPIView(generics.CreateAPIView):
     serializer_class = OrderAssignSerializer
 
     def post(self, request, *args, **kwargs):
-        if "courier_id" not in request.data.keys():
+        if 'courier_id' not in request.data.keys():
             return JsonResponse({'courier_id': 'This field is required.'}, status=400)
         validation = OrderAssignSerializer(data=request.data)
         if validation.is_valid():

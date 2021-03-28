@@ -3,19 +3,22 @@ from rest_framework import status
 from django.test import TestCase, Client
 from django.urls import reverse
 from ..models import Courier, Order, CourierType
-from ..serializers import CourierSerializer, OrderSerializer, CourierRegionsSerializer
+from ..serializers import CourierSerializer, OrderSerializer, CourierTypeSerializer
 from .test_requests_contents import valid_couriers, invalid_couriers, \
-    valid_courier_patch, valid_orders, invalid_orders, valid_assign, \
-    invalid_assign, valid_complete, invalid_courier_patch, invalid_complete, valid_courier_type, invalid_courier_type
+    valid_courier_patch, valid_orders, invalid_orders, \
+    invalid_assign, valid_complete, invalid_courier_patch, invalid_complete, valid_courier_type, invalid_courier_type, \
+    valid_assign_one, valid_assign_two
 
 client = Client()
 
 
 class GetPostCourierTypesTest(TestCase):
+    fixtures = ['initial_data']
+
     def test_get_all_courier_types(self):
         response = client.get(reverse('courier-types-list'))
         courier_types = CourierType.objects.all()
-        serializer = CourierRegionsSerializer(courier_types, many=True)
+        serializer = CourierTypeSerializer(courier_types, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
@@ -33,7 +36,7 @@ class GetPostCourierTypesTest(TestCase):
 
 
 class GetPostPatchCouriersTest(TestCase):
-    fixtures = ['initial_data', 'test_data']
+    fixtures = ['test_data']
 
     def test_get_all_couriers(self):
         response = client.get(reverse('couriers-list'))
@@ -43,7 +46,7 @@ class GetPostPatchCouriersTest(TestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_get_valid_courier_details_no_rating(self):
-        response = client.get(reverse('courier-detail', kwargs={'pk': 3}))
+        response = client.get(reverse('courier-detail', kwargs={'pk': 2}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(list(json.loads(response.content).keys()),
                          ['courier_id', 'courier_type', 'regions', 'working_hours', 'earnings'])
@@ -119,11 +122,18 @@ class GetPostOrdersTest(TestCase):
 
 
 class AssignOrderTest(TestCase):
-    fixtures = ['initial_data', 'test_data']
+    fixtures = ['test_data']
 
-    def test_assign_valid(self):
+    def test_assign_valid_no_new_orders(self):
         response = client.post(path=reverse('order-assign'),
-                               data=valid_assign,
+                               data=valid_assign_one,
+                               content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(list(json.loads(response.content).keys()), ['orders', 'assign_time'])
+
+    def test_assign_valid_new_orders(self):
+        response = client.post(path=reverse('order-assign'),
+                               data=valid_assign_two,
                                content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(list(json.loads(response.content).keys()), ['orders', 'assign_time'])
@@ -137,7 +147,7 @@ class AssignOrderTest(TestCase):
 
 
 class CompleteOrderTest(TestCase):
-    fixtures = ['initial_data', 'test_data']
+    fixtures = ['test_data']
 
     def test_complete_valid(self):
         response_complete = client.post(path=reverse('order-complete'),

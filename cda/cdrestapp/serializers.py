@@ -1,11 +1,14 @@
 from rest_framework.serializers import ValidationError, ModelSerializer
-from django.db.models import Q
+from django.db.models import Q, F
 from django.utils import timezone
 from datetime import datetime, timezone
 from .models import CourierType, CourierRegions, Courier, \
     Order, WorkingHours, DeliveryHours
 from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
 from decimal import Decimal
+
+from rest_framework.fields import empty
+from rest_framework.settings import api_settings
 
 
 class CourierTypeSerializer(ModelSerializer):
@@ -151,18 +154,34 @@ class CourierSerializer(ModelSerializer):
             self.save_regions(validated_data)
         regions = CourierRegions.objects.filter(courier_id=instance).values_list('region', flat=True)
         capacity = CourierType.objects.get(courier_type=instance.courier_type.courier_type).capacity
-        orders = Order.objects.filter(courier_id=instance, complete_time__isnull=True)
+        orders_to_deliver = Order.objects.filter(courier_id=instance, complete_time__isnull=True).order_by('-weight')
+        partial_delivery = Order.objects.filter(courier_id=instance,
+                                                complete_time__isnull=False,
+                                                delivery_complete=False)
         working_hours = WorkingHours.objects.filter(courier_id=instance)
-        # TODO write a funny comment about how awful this section is (⊙_⊙;)
-        for order in orders:
+        for order in orders_to_deliver:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
-            if not (Decimal.compare(Decimal(capacity), Decimal(order.weight))+1 > 0 and
-                    order.region in regions and
-                    work_delivery_intersect(working_hours, delivery_hours)):
+            if not (order.region in regions and work_delivery_intersect(working_hours, delivery_hours)):
                 order.courier_id = None
                 order.assign_time = None
                 order.courier_type = None
+                order.delivery_complete = None
                 order.save()
+                orders_to_deliver = orders_to_deliver.exclude(order_id=order.order_id)
+        total_weight = sum(orders_to_deliver.values_list('weight', flat=True))
+        order_ids_to_remove = []
+        while total_weight > capacity and orders_to_deliver.exists():
+            total_weight -= orders_to_deliver[0].weight
+            order_ids_to_remove.append(orders_to_deliver[0].order_id)
+            orders_to_deliver = orders_to_deliver.exclude(order_id=orders_to_deliver[0].order_id)
+        Order.objects.filter(order_id__in=order_ids_to_remove).update(courier_id=None,
+                                                                      assign_time=None,
+                                                                      courier_type=None,
+                                                                      delivery_complete=None)
+        if not orders_to_deliver.exists() and partial_delivery.exists():
+            instance.earnings = F('earnings') + 500 * partial_delivery[0].courier_type.earnings_coef
+            instance.save()
+            partial_delivery.update(delivery_complete=True)
         return instance
 
     def validate_regions(self, value):
@@ -174,6 +193,14 @@ class CourierSerializer(ModelSerializer):
         if len(value) == 0:
             raise ValidationError('List should not be empty.')
         return value
+
+    def run_validation(self, data=empty):
+        if data is not empty:
+            unknown = set(data) - set(self.fields)
+            if unknown:
+                errors = ["Unknown field: {}".format(f) for f in unknown]
+                raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: errors})
+        return super(CourierSerializer, self).run_validation(data)
 
 
 class OrderSerializer(ModelSerializer):
@@ -205,6 +232,14 @@ class OrderSerializer(ModelSerializer):
             raise ValidationError('List should not be empty.')
         return value
 
+    def run_validation(self, data=empty):
+        if data is not empty:
+            unknown = set(data) - set(self.fields)
+            if unknown:
+                errors = ["Unknown field: {}".format(f) for f in unknown]
+                raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: errors})
+        return super(OrderSerializer, self).run_validation(data)
+
 
 class OrderAssignSerializer(ModelSerializer):
     class Meta:
@@ -212,37 +247,41 @@ class OrderAssignSerializer(ModelSerializer):
         fields = ('courier_id',)
 
     def create(self, validated_data):
-        current_time = datetime.now(timezone.utc)
         courier_obj = validated_data['courier_id']
+        assigned_orders = Order.objects.filter(courier_id=courier_obj, complete_time__isnull=True)
+        if assigned_orders.exists():
+            response = {'orders': [{'id': order.order_id} for order in assigned_orders],
+                        'assign_time': assigned_orders[0].assign_time}
+            return response
         regions = CourierRegions.objects.filter(courier_id=courier_obj).values_list('region', flat=True)
-        weight = CourierType.objects.get(courier_type=courier_obj.courier_type.courier_type).capacity
-        # find orders that can be assigned to this courier among all orders and assign them
-        orders = Order.objects.filter(Q(weight__lte=weight), Q(region__in=regions),
-                                      Q(courier_id__isnull=True) | Q(courier_id=courier_obj),
-                                      Q(complete_time__isnull=True))
-        nice_orders = []
+        capacity = courier_obj.courier_type.capacity  # TODO check this
+        orders = Order.objects.filter(weight__lte=capacity, region__in=regions, courier_id__isnull=True)
+        current_time = datetime.now(timezone.utc)
+        orders_to_assign = []
         working_hours = WorkingHours.objects.filter(courier_id=courier_obj)
-        # TODO write a funny comment about how awful this section is (⊙_⊙;)
-        # TODO and it repeats as well (⊙_⊙;) (⊙_⊙;)
+        total_weight = 0
         for order in orders:
+            if total_weight + order.weight > capacity:
+                break
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
-            nice = False
             if work_delivery_intersect(working_hours, delivery_hours):
-                nice_orders.append(order)
-                # TODO F() notation ?
-                if order.courier_id is None:
-                    order.courier_id = courier_obj
-                    order.assign_time = current_time
-                    order.courier_type = courier_obj.courier_type
-                    order.save()
-        response = {'orders': [{'id': order.order_id} for order in nice_orders]}
-        if len(nice_orders):
-            current_time = nice_orders[0].assign_time
-            for order in nice_orders:
-                if order.assign_time > current_time:
-                    current_time = order.assign_time
-            response['assign_time'] = current_time.strftime('%Y-%m-%dT%H:%M:%S:%f')[:-4]+'Z'
+                orders_to_assign.append(order)
+                total_weight += order.weight
+                order.courier_id = courier_obj
+                order.assign_time = current_time
+                order.courier_type = courier_obj.courier_type
+                order.delivery_complete = False
+                order.save()
+        response = {'orders': [{'id': order.order_id} for order in orders_to_assign]}
+        if orders_to_assign:
+            response['assign_time'] = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-4]+'Z'
         return response
+
+    def validate(self, attrs):
+        unknown = set(self.initial_data) - set(self.fields)
+        if unknown:
+            raise ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+        return attrs
 
 
 class OrderCompleteSerializer(ModelSerializer):
@@ -258,9 +297,15 @@ class OrderCompleteSerializer(ModelSerializer):
         order_obj.complete_time = validated_data['complete_time']
         order_obj.save()
 
+        if not Order.objects.filter(courier_id=order_obj.courier_id, complete_time__isnull=True).exists():
+            order_obj.courier_id.earnings = F('earnings') + 500 * order_obj.courier_type.earnings_coef
+            order_obj.courier_id.save()
+            Order.objects.filter(assign_time=order_obj.assign_time).update(delivery_complete=True)
+
         response = {'order_id': validated_data['order_id']}
         return response
 
+    # TODO validate complete_time > assign_time
     def validate_order_id(self, value):
         if not Order.objects.filter(order_id=value):
             raise ValidationError(f'Order with id {value} does not exist.')
@@ -269,6 +314,13 @@ class OrderCompleteSerializer(ModelSerializer):
             raise ValidationError(f'Order with id {value} was not assigned to any courier.')
         if order_obj.complete_time is not None:
             raise ValidationError(f'Order with id {value} has already been completed.')
-        if not Courier.objects.filter(courier_id=order_obj.courier_id.courier_id):
-            raise ValidationError(f'Order with id {value} is assigned to another courier.')
         return value
+
+    def validate(self, attrs):
+        order_obj = Order.objects.get(order_id=attrs['order_id'])
+        if order_obj.courier_id.courier_id != attrs['courier_id'].courier_id:
+            raise ValidationError(f'Order with id {order_obj.order_id} is assigned to another courier.')
+        unknown = set(self.initial_data) - set(self.fields)
+        if unknown:
+            raise ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+        return attrs
