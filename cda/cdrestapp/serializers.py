@@ -1,19 +1,18 @@
-from rest_framework.serializers import ValidationError, ModelSerializer
-from django.db.models import F
-from django.utils import timezone
 from datetime import datetime, timezone
-from .models import CourierType, CourierRegions, Courier, \
-    Order, WorkingHours, DeliveryHours
-from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
-
+from rest_framework.serializers import ValidationError, ModelSerializer
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
+from django.db.models import F
+from .models import CourierType, CourierRegions, Courier, \
+    Order, WorkingHours, DeliveryHours
+from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE,\
+    WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
 
 
 class CourierTypeSerializer(ModelSerializer):
     class Meta:
         model = CourierType
-        fields = "__all__"
+        fields = '__all__'
 
     def to_representation(self, instance):
         return instance.courier_type
@@ -22,7 +21,7 @@ class CourierTypeSerializer(ModelSerializer):
 class CourierRegionsSerializer(ModelSerializer):
     class Meta:
         model = CourierRegions
-        fields = "__all__"
+        fields = '__all__'
 
     def to_representation(self, instance):
         return instance.region
@@ -48,16 +47,16 @@ class CourierRegionsSerializer(ModelSerializer):
 class WorkingHoursSerializer(ModelSerializer):
     class Meta:
         model = WorkingHours
-        fields = "__all__"
+        fields = '__all__'
 
     def to_representation(self, instance):
         return str(instance.work_start)[:5] + '-' + str(instance.work_end)[:5]
 
     def create(self, validated_data):
-        wh = WorkingHours.objects.create(courier_id=Courier.objects.get(courier_id=validated_data['courier_id']),
-                                         work_start=validated_data['working_hours'][:5],
-                                         work_end=validated_data['working_hours'][6:])
-        return wh
+        w_h = WorkingHours.objects.create(courier_id=Courier.objects.get(courier_id=validated_data['courier_id']),
+                                          work_start=validated_data['working_hours'][:5],
+                                          work_end=validated_data['working_hours'][6:])
+        return w_h
 
     # TODO refactor this
     def to_internal_value(self, data):
@@ -79,16 +78,16 @@ class WorkingHoursSerializer(ModelSerializer):
 class DeliveryHoursSerializer(ModelSerializer):
     class Meta:
         model = WorkingHours
-        fields = "__all__"
+        fields = '__all__'
 
     def to_representation(self, instance):
         return str(instance.delivery_start)[:5] + '-' + str(instance.delivery_end)[:5]
 
     def create(self, validated_data):
-        dh = DeliveryHours.objects.create(order_id=Order.objects.get(order_id=validated_data['order_id']),
-                                          delivery_start=validated_data['delivery_hours'][:5],
-                                          delivery_end=validated_data['delivery_hours'][6:])
-        return dh
+        d_h = DeliveryHours.objects.create(order_id=Order.objects.get(order_id=validated_data['order_id']),
+                                           delivery_start=validated_data['delivery_hours'][:5],
+                                           delivery_end=validated_data['delivery_hours'][6:])
+        return d_h
 
     # TODO refactor this
     def to_internal_value(self, data):
@@ -126,12 +125,12 @@ class CourierSerializer(ModelSerializer):
 
     @staticmethod
     def save_hours(validated_data):
-        for wh in validated_data['working_hours']:
-            new_wh = WorkingHoursSerializer(data={'courier_id': validated_data['courier_id'],
-                                                  'working_hours': wh})
-            if not new_wh.is_valid():
-                raise ValidationError(new_wh.errors)
-            new_wh.save()
+        for w_h in validated_data['working_hours']:
+            new_w_h = WorkingHoursSerializer(data={'courier_id': validated_data['courier_id'],
+                                                   'working_hours': w_h})
+            if not new_w_h.is_valid():
+                raise ValidationError(new_w_h.errors)
+            new_w_h.save()
 
     def create(self, validated_data):
         new_courier = Courier(courier_id=validated_data['courier_id'],
@@ -203,9 +202,9 @@ class CourierSerializer(ModelSerializer):
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
-                errors = ["Unknown field: {}".format(f) for f in unknown]
+                errors = ['Unknown field: {}'.format(f) for f in unknown]
                 raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: errors})
-        return super(CourierSerializer, self).run_validation(data)
+        return super().run_validation(data)
 
 
 class OrderSerializer(ModelSerializer):
@@ -217,12 +216,12 @@ class OrderSerializer(ModelSerializer):
 
     @staticmethod
     def save_hours(validated_data):
-        for dh in validated_data['delivery_hours']:
-            new_dh = DeliveryHoursSerializer(data={'order_id': validated_data['order_id'],
-                                                   'delivery_hours': dh})
-            if not new_dh.is_valid():
-                raise ValidationError(new_dh.errors)
-            new_dh.save()
+        for d_h in validated_data['delivery_hours']:
+            new_d_h = DeliveryHoursSerializer(data={'order_id': validated_data['order_id'],
+                                                    'delivery_hours': d_h})
+            if not new_d_h.is_valid():
+                raise ValidationError(new_d_h.errors)
+            new_d_h.save()
 
     def create(self, validated_data):
         new_order = Order(order_id=validated_data['order_id'],
@@ -241,9 +240,9 @@ class OrderSerializer(ModelSerializer):
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
-                errors = ["Unknown field: {}".format(f) for f in unknown]
+                errors = ['Unknown field: {}'.format(f) for f in unknown]
                 raise ValidationError({api_settings.NON_FIELD_ERRORS_KEY: errors})
-        return super(OrderSerializer, self).run_validation(data)
+        return super().run_validation(data)
 
 
 class OrderAssignSerializer(ModelSerializer):
@@ -256,7 +255,7 @@ class OrderAssignSerializer(ModelSerializer):
         assigned_orders = Order.objects.filter(courier_id=courier_obj, complete_time__isnull=True)
         if assigned_orders.exists():  # if current delivery is not over, return uncompleted orders
             response = {'orders': [{'id': order.order_id} for order in assigned_orders],
-                        'assign_time': assigned_orders[0].assign_time}
+                        'assign_time': assigned_orders[0].assign_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-4] + 'Z'}
             return response
         regions = CourierRegions.objects.filter(courier_id=courier_obj).values_list('region', flat=True)
         capacity = courier_obj.courier_type.capacity
@@ -279,13 +278,13 @@ class OrderAssignSerializer(ModelSerializer):
                 order.save()
         response = {'orders': [{'id': order.order_id} for order in orders_to_assign]}
         if orders_to_assign:
-            response['assign_time'] = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-4]+'Z'
+            response['assign_time'] = current_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-4] + 'Z'
         return response
 
     def validate(self, attrs):
         unknown = set(self.initial_data) - set(self.fields)
         if unknown:
-            raise ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+            raise ValidationError('Unknown field(s): {}'.format('', ''.join(unknown)))
         return attrs
 
 

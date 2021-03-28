@@ -4,7 +4,8 @@ from rest_framework.settings import api_settings
 
 from .models import CourierType, CourierRegions, Courier, Order
 from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
-                         OrderSerializer, CourierSerializer, OrderAssignSerializer, OrderCompleteSerializer
+    OrderAssignSerializer, OrderCompleteSerializer, \
+    OrderSerializer, CourierSerializer
 
 
 class CourierTypeAPIView(generics.ListCreateAPIView):

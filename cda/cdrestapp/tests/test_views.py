@@ -5,9 +5,9 @@ from django.urls import reverse
 from ..models import Courier, Order, CourierType
 from ..serializers import CourierSerializer, OrderSerializer, CourierTypeSerializer
 from .test_requests_contents import valid_couriers, invalid_couriers, \
-    valid_courier_patch, valid_orders, invalid_orders, \
-    invalid_assign, valid_complete, invalid_courier_patch, invalid_complete, valid_courier_type, invalid_courier_type, \
-    valid_assign_one, valid_assign_two
+    valid_courier_patch, valid_orders, invalid_orders, invalid_assign, \
+    valid_complete, invalid_courier_patch, invalid_complete, valid_courier_type, \
+    invalid_courier_type, valid_assign_one, valid_assign_two
 
 client = Client()
 

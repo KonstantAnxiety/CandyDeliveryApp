@@ -6,9 +6,9 @@ WRONG_TIME_INTERVAL_ORDER = 'Provide a valid time interval with an end time grea
 
 
 def work_delivery_intersect(working_hours, delivery_hours):
-    for dh in delivery_hours:
-        for wh in working_hours:
-            if dh.delivery_start <= wh.work_start < dh.delivery_end or \
-                    wh.work_start <= dh.delivery_start < wh.work_end:
+    for d_h in delivery_hours:
+        for w_h in working_hours:
+            if d_h.delivery_start <= w_h.work_start < d_h.delivery_end or \
+                    w_h.work_start <= d_h.delivery_start < w_h.work_end:
                 return True
     return False
