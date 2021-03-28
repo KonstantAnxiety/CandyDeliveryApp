@@ -25,7 +25,7 @@ SECRET_KEY = 'j-ui(0x4fk!)&bi19l=*_mu-$%9=zm+thb2u5+f&e#7rmu$k-g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '*']
 
 # Application definition
 
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'cdrestapp',
-    'django_extensions'
 ]
 
 MIDDLEWARE = [
