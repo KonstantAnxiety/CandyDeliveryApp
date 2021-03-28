@@ -254,7 +254,7 @@ class OrderAssignSerializer(ModelSerializer):
                         'assign_time': assigned_orders[0].assign_time}
             return response
         regions = CourierRegions.objects.filter(courier_id=courier_obj).values_list('region', flat=True)
-        capacity = courier_obj.courier_type.capacity  # TODO check this
+        capacity = courier_obj.courier_type.capacity
         orders = Order.objects.filter(weight__lte=capacity, region__in=regions, courier_id__isnull=True)
         current_time = datetime.now(timezone.utc)
         orders_to_assign = []
@@ -317,10 +317,15 @@ class OrderCompleteSerializer(ModelSerializer):
         return value
 
     def validate(self, attrs):
+        errors = {}
         order_obj = Order.objects.get(order_id=attrs['order_id'])
         if order_obj.courier_id.courier_id != attrs['courier_id'].courier_id:
-            raise ValidationError(f'Order with id {order_obj.order_id} is assigned to another courier.')
+            errors['order_id'] = f'Order with id {order_obj.order_id} is assigned to another courier.'
         unknown = set(self.initial_data) - set(self.fields)
         if unknown:
-            raise ValidationError("Unknown field(s): {}".format(", ".join(unknown)))
+            errors['Unknown field(s)'] = ''.join(unknown)
+        if order_obj.assign_time > attrs['complete_time']:
+            errors['complete_time'] = 'complete_time cannot be greater then assign_time.'
+        if errors:
+            raise ValidationError(errors)
         return attrs

@@ -32,7 +32,6 @@ class Order(models.Model):
 
 	order_id = models.IntegerField(primary_key=True)
 	courier_id = models.ForeignKey(Courier, on_delete=models.CASCADE, null=True)
-	# TODO max_digits ?
 	weight = models.DecimalField(max_digits=4, decimal_places=2, default=1,
 								 validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('50'))])
 	region = models.IntegerField(validators=[MinValueValidator(1)])
