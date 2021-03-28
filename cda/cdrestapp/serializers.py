@@ -1,11 +1,10 @@
 from rest_framework.serializers import ValidationError, ModelSerializer
-from django.db.models import Q, F
+from django.db.models import F
 from django.utils import timezone
 from datetime import datetime, timezone
 from .models import CourierType, CourierRegions, Courier, \
     Order, WorkingHours, DeliveryHours
 from .functions import time_interval_re, WRONG_TIME_FORMAT_MESSAGE, WRONG_TIME_INTERVAL_ORDER, work_delivery_intersect
-from decimal import Decimal
 
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
@@ -158,7 +157,9 @@ class CourierSerializer(ModelSerializer):
         partial_delivery = Order.objects.filter(courier_id=instance,
                                                 complete_time__isnull=False,
                                                 delivery_complete=False)
+        # yeah I know this looks abysmal why do you ask
         working_hours = WorkingHours.objects.filter(courier_id=instance)
+        # remove orders that do not suit working hours
         for order in orders_to_deliver:
             delivery_hours = DeliveryHours.objects.filter(order_id=order)
             if not (order.region in regions and work_delivery_intersect(working_hours, delivery_hours)):
@@ -170,6 +171,7 @@ class CourierSerializer(ModelSerializer):
                 orders_to_deliver = orders_to_deliver.exclude(order_id=order.order_id)
         total_weight = sum(orders_to_deliver.values_list('weight', flat=True))
         order_ids_to_remove = []
+        # remove too heavy orders
         while total_weight > capacity and orders_to_deliver.exists():
             total_weight -= orders_to_deliver[0].weight
             order_ids_to_remove.append(orders_to_deliver[0].order_id)
@@ -178,6 +180,8 @@ class CourierSerializer(ModelSerializer):
                                                                       assign_time=None,
                                                                       courier_type=None,
                                                                       delivery_complete=None)
+        # add earnings if current delivery is over
+        # and he managed to complete any orders from it
         if not orders_to_deliver.exists() and partial_delivery.exists():
             instance.earnings = F('earnings') + 500 * partial_delivery[0].courier_type.earnings_coef
             instance.save()
@@ -195,6 +199,7 @@ class CourierSerializer(ModelSerializer):
         return value
 
     def run_validation(self, data=empty):
+        # no idea why there is no such built in feature in DRF
         if data is not empty:
             unknown = set(data) - set(self.fields)
             if unknown:
@@ -249,7 +254,7 @@ class OrderAssignSerializer(ModelSerializer):
     def create(self, validated_data):
         courier_obj = validated_data['courier_id']
         assigned_orders = Order.objects.filter(courier_id=courier_obj, complete_time__isnull=True)
-        if assigned_orders.exists():
+        if assigned_orders.exists():  # if current delivery is not over, return uncompleted orders
             response = {'orders': [{'id': order.order_id} for order in assigned_orders],
                         'assign_time': assigned_orders[0].assign_time}
             return response
@@ -297,6 +302,7 @@ class OrderCompleteSerializer(ModelSerializer):
         order_obj.complete_time = validated_data['complete_time']
         order_obj.save()
 
+        # if current delivery is over, add earnings
         if not Order.objects.filter(courier_id=order_obj.courier_id, complete_time__isnull=True).exists():
             order_obj.courier_id.earnings = F('earnings') + 500 * order_obj.courier_type.earnings_coef
             order_obj.courier_id.save()
@@ -305,9 +311,8 @@ class OrderCompleteSerializer(ModelSerializer):
         response = {'order_id': validated_data['order_id']}
         return response
 
-    # TODO validate complete_time > assign_time
     def validate_order_id(self, value):
-        if not Order.objects.filter(order_id=value):
+        if not Order.objects.filter(order_id=value).exists():
             raise ValidationError(f'Order with id {value} does not exist.')
         order_obj = Order.objects.get(order_id=value)
         if order_obj.assign_time is None:

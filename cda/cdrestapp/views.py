@@ -1,6 +1,4 @@
-import json
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.db.models import Min
+from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.settings import api_settings
 
@@ -61,7 +59,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
 
     def get(self, request, *args, **kwargs):
         pk = kwargs['pk']
-        if not Courier.objects.filter(courier_id=pk):
+        if not Courier.objects.filter(courier_id=pk).exists():
             return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         courier_detail = CourierSerializer(instance=courier).data
@@ -69,10 +67,11 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         completed_orders = Order.objects.filter(courier_id=courier,
                                                 delivery_complete=True)
         min_avg_region_time = 60*60
+        # yeah I know this looks abysmal why do you ask
         for region in regions:
             region_orders = completed_orders.filter(region=region.region)
             num_region_time = len(region_orders)
-            if not num_region_time:
+            if num_region_time == 0:
                 continue
             sum_region_time = 0
             for order in region_orders:
@@ -90,7 +89,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
             avg_region_time = sum_region_time / num_region_time
             if avg_region_time < min_avg_region_time:
                 min_avg_region_time = avg_region_time
-        if completed_orders:
+        if completed_orders.exists():
             courier_detail['rating'] = round((60*60 - min_avg_region_time)/60/60 * 5, 2)
 
         courier_detail['earnings'] = courier.earnings
@@ -100,7 +99,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         pk = kwargs['pk']
         patch_data = request.data
         patch_data['courier_id'] = pk
-        if not Courier.objects.filter(courier_id=pk):
+        if not Courier.objects.filter(courier_id=pk).exists():
             return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         validation = CourierSerializer(data=patch_data, partial=True, instance=courier)
