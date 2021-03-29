@@ -169,6 +169,8 @@ You should see some html (Not found, because the root page is not implemented in
 Now the socket should be active when you execute
 ```sh
 sudo systemctl status gunicorn.socket
+sudo journalctl -u gunicorn.socket
+sudo journalctl -u gunicorn
 ```
 
 ### Configure nginx
@@ -204,7 +206,8 @@ sudo service nginx restart
 ```
 * Troubleshoot with
 ```sh
-sudo systemctl status gunicorn
+sudo systemctl status nginx
+sudo journalctl -u nginx
 ```
 
 ## Tests
@@ -238,7 +241,7 @@ coverage report
  ```json
 {
     "courier_type": "scooter",
-    "capacity": "10",
+    "capacity": 10,
     "earnings_coef": 7
 }
  ```
