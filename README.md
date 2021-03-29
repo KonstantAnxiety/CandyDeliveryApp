@@ -169,6 +169,9 @@ You should see some html (Not found, because the root page is not implemented in
 Now the socket should be active when you execute
 ```sh
 sudo systemctl status gunicorn.socket
+```
+* Troubleshoot with
+```sh
 sudo journalctl -u gunicorn.socket
 sudo journalctl -u gunicorn
 ```
@@ -225,7 +228,7 @@ cd cda/
 ```
 This app features Django's unit tests.
 
-To run tests use the following command while in the same directory as manage.py
+To run the tests use the following command while in the same directory as manage.py
 ```sh
 python3 manage.py test
 ```
