@@ -70,7 +70,7 @@ postgres=# GRANT ALL PRIVILEGES ON DATABASE cda_db to sampledbuser;
 postgres=# \q
 ```
 * To let the app to interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py```
-```python
+<pre>
  ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `#f03c15`
 DATABASES = {
     'default': {
@@ -83,7 +83,7 @@ DATABASES = {
     }
 
 }
-```
+</pre>
 * Migrate the database and load initial data
 ```console
 cd cda/
