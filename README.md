@@ -70,7 +70,7 @@ postgres=# ALTER ROLE sampledbuser SET timezone TO 'UTC';
 postgres=# GRANT ALL PRIVILEGES ON DATABASE cda_db to sampledbuser;
 postgres=# \q
 ```
-* To let the app to interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py``` (highlighted lines imply individual information)
+* To let the app interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py``` (highlighted lines imply individual information)
 ```diff
 DATABASES = {
     'default': {
