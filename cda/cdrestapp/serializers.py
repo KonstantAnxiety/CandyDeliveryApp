@@ -46,6 +46,7 @@ class CourierRegionsSerializer(ModelSerializer):
     # TODO refactor this
     def to_internal_value(self, data):
         """Validate data."""
+
         if isinstance(data, int):
             if data <= 0:
                 raise ValidationError({data: 'Ensure this value is greater than or equal to 1.'})
@@ -82,6 +83,7 @@ class WorkingHoursSerializer(ModelSerializer):
     # TODO refactor this
     def to_internal_value(self, data):
         """Validate data."""
+
         if isinstance(data, str):
             if not time_interval_re.match(data):
                 raise ValidationError({data: WRONG_TIME_FORMAT_MESSAGE})
@@ -240,19 +242,30 @@ class CourierSerializer(ModelSerializer):
         return instance
 
     def validate_regions(self, value):
-        """Raises ValidationError if the given list of regions is empty, the list otherwise."""
+        """
+        Raises ValidationError if the given list of regions
+        is empty, the list otherwise.
+        """
+
         if len(value) == 0:
             raise ValidationError('List should not be empty.')
         return value
 
     def validate_working_hours(self, value):
-        """Raises ValidationError if the given list of working hours is empty, the list otherwise."""
+        """
+        Raises ValidationError if the given list of working hours
+        is empty, the list otherwise.
+        """
+
         if len(value) == 0:
             raise ValidationError('List should not be empty.')
         return value
 
     def run_validation(self, data=empty):
-        """Raises ValidationError if the request body contains unexpected fields."""
+        """
+        Raises ValidationError if the request body
+        contains unexpected fields.
+        """
 
         # no idea why there is no such built in feature in DRF
         if data is not empty:
@@ -298,14 +311,20 @@ class OrderSerializer(ModelSerializer):
         return new_order
 
     def validate_delivery_hours(self, value):
-        """Raises ValidationError if the given list of delivery hours is empty, the list otherwise."""
+        """
+        Raises ValidationError if the given list of delivery hours
+        is empty, the list otherwise.
+        """
 
         if len(value) == 0:
             raise ValidationError('List should not be empty.')
         return value
 
     def run_validation(self, data=empty):
-        """Raises ValidationError if the request body contains unexpected fields."""
+        """
+        Raises ValidationError if the request body
+        contains unexpected fields.
+        """
 
         if data is not empty:
             unknown = set(data) - set(self.fields)
@@ -358,7 +377,10 @@ class OrderAssignSerializer(ModelSerializer):
         return response
 
     def validate(self, attrs):
-        """Raises ValidationError if the request body contains unexpected fields."""
+        """
+        Raises ValidationError if the request body
+        contains unexpected fields.
+        """
 
         unknown = set(self.initial_data) - set(self.fields)
         if unknown:
@@ -379,7 +401,10 @@ class OrderCompleteSerializer(ModelSerializer):
         }
 
     def create(self, validated_data):
-        """Mark given order as completed and increases related courier's earning if current delivery is over."""
+        """
+        Mark given order as completed and increases
+        related courier's earning if current delivery is over.
+        """
 
         order_obj = Order.objects.get(order_id=validated_data['order_id'])
         order_obj.complete_time = validated_data['complete_time']

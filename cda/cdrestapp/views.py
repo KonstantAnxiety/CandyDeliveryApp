@@ -38,7 +38,10 @@ class CourierAPIView(generics.ListCreateAPIView):
     serializer_class = CourierSerializer
 
     def post(self, request, *args, **kwargs):
-        """Create new Courier instances and return HTTP_201 or return HTTP_400."""
+        """
+        Create new Courier instances and
+        return HTTP_201 or return HTTP_400.
+        """
 
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
@@ -137,7 +140,10 @@ class OrderAPIView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
 
     def post(self, request, *args, **kwargs):
-        """Create new Order instances and return HTTP_201 or return HTTP_400."""
+        """
+        Create new Order instances and
+        return HTTP_201 or return HTTP_400.
+        """
 
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
@@ -170,7 +176,10 @@ class OrderAssignAPIView(generics.CreateAPIView):
     serializer_class = OrderAssignSerializer
 
     def post(self, request, *args, **kwargs):
-        """Assign orders to given courier and return HTTP_200 or return HTTP_400"""
+        """
+        Assign orders to given courier and
+        return HTTP_200 or return HTTP_400
+        """
 
         if 'courier_id' not in request.data.keys():
             return JsonResponse({'courier_id': 'This field is required.'}, status=400)
@@ -187,7 +196,10 @@ class OrderCompleteAPIView(generics.CreateAPIView):
     serializer_class = OrderCompleteSerializer
 
     def post(self, request, *args, **kwargs):
-        """Mark the given order as completed and return HTTP_200 or return HTTP_400"""
+        """
+        Mark the given order as completed
+        and return HTTP_200 or return HTTP_400
+        """
 
         validation = OrderCompleteSerializer(data=request.data)
         if validation.is_valid():
