@@ -231,3 +231,16 @@ python3 manage.py test
 coverage run manage.py test
 coverage report
 ```
+ ## Comments for backend-school
+ The app features several more useful endpoints aside from the task, e.g.
+ * `GET /courier-types` – list of all courier-types
+ * `POST /courier-types` – add a new courier type, e.g.
+ ```json
+{
+    "courier_type": "scooter",
+    "capacity": "10",
+    "earnings_coef": 7
+}
+ ```
+ * `GET /couriers` – list of all couriers
+ * `GET /orders` – list of all orders
