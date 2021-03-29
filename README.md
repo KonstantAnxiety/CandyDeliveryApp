@@ -109,7 +109,7 @@ python manage.py collectstatic
 deactivate
 ```
 
-## Configure Gunicorn
+### Configure Gunicorn
 * Create a socket file for gunicorn
 ```sh
 sudo nano /etc/systemd/system/gunicorn.socket
@@ -171,7 +171,7 @@ Now the socket should be active when you execute
 sudo systemctl status gunicorn.socket
 ```
 
-## Configure nginx
+### Configure nginx
 * Assuming you want to modify the default server block
 ```sh
 sudo nano /etc/nginx/sites-available/default
@@ -207,7 +207,7 @@ sudo service nginx restart
 sudo systemctl status gunicorn
 ```
 
-### Tests
+## Tests
 * Change to the repo directory
 ```sh
 cd ~/webapp/candydelivery
