@@ -59,7 +59,7 @@ virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
-* Log into Postgres session, create a database and new user for the django app
+* Log into Postgres session, create the database and a new user for the django app
 ```sh
 sudo -u postgres psql
 postgres=# CREATE DATABASE cda_db;
