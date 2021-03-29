@@ -10,7 +10,7 @@ REST API for candy shop deliveries ([TASK](https://disk.yandex.ru/d/TbWKTZbnOST8
 * nginx
 
 ## Database diagram
-The database is more robust then it is needed for the task, e.g. new courier types can be added to the reference table CourierType.
+The database enables more flexibility than it is needed for the task, e.g. new courier types can be added to the reference table CourierType.
 
 ![DB diagram](https://user-images.githubusercontent.com/58992437/112771820-63af5200-9036-11eb-948a-b559679def60.png)
 
@@ -43,7 +43,7 @@ mkdir webapp
 cd webapp/
 ```
 * Generate a new rsa key pair and add the public key to GitHub
-```console
+```sh
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
 ```
@@ -72,6 +72,7 @@ postgres=# \q
 ```
 * To let the app interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py``` (highlighted lines imply individual information)
 ```diff
+...
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -83,6 +84,7 @@ DATABASES = {
     }
 
 }
+...
 ```
 * Do not use the secret key from the repo, instead generate a new one for the app with 
 ```sh
@@ -239,7 +241,7 @@ coverage report
 ```
  ## Comments for backend-school
  The app features several more useful endpoints aside from the task, e.g.
- * `GET /courier-types` – list of all courier-types
+ * `GET /courier-types` – list of all courier types
  * `POST /courier-types` – add a new courier type, e.g.
  ```json
 {
