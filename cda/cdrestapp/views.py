@@ -64,13 +64,13 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
             return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         courier_detail = CourierSerializer(instance=courier).data
-        regions = CourierRegions.objects.filter(courier_id=courier)
         completed_orders = Order.objects.filter(courier_id=courier,
                                                 delivery_complete=True)
         min_avg_region_time = 60*60
+        regions = completed_orders.order_by('region').values_list('region', flat=True).distinct()
         # yeah I know this looks abysmal why do you ask
         for region in regions:
-            region_orders = completed_orders.filter(region=region.region)
+            region_orders = completed_orders.filter(region=region)
             num_region_time = len(region_orders)
             if num_region_time == 0:
                 continue
