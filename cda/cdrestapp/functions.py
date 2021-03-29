@@ -5,7 +5,8 @@ WRONG_TIME_FORMAT_MESSAGE = 'Wrong time format. Use "HH:MM-HH:MM".'
 WRONG_TIME_INTERVAL_ORDER = 'Provide a valid time interval with an end time greater than the start time'
 
 
-def work_delivery_intersect(working_hours, delivery_hours):
+def work_delivery_intersect(working_hours, delivery_hours) -> bool:
+    """Return True if any intervals in working_hours and delivery_hours intersect, else False."""
     for d_h in delivery_hours:
         for w_h in working_hours:
             if d_h.delivery_start <= w_h.work_start < d_h.delivery_end or \

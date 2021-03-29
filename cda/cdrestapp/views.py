@@ -9,10 +9,14 @@ from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
 
 
 class CourierTypeAPIView(generics.ListCreateAPIView):
+    """Courier view class (methods: GET, POST)."""
+
     queryset = CourierType.objects.all()
     serializer_class = CourierTypeSerializer
 
     def post(self, request, *args, **kwargs):
+        """Create new CourierRegion instance."""
+
         validation = CourierTypeSerializer(data=request.data)
         if validation.is_valid():
             validation.save()
@@ -21,15 +25,21 @@ class CourierTypeAPIView(generics.ListCreateAPIView):
 
 
 class CourierRegionsAPIView(generics.ListCreateAPIView):
+    """CourierRegions view class."""
+
     queryset = CourierRegions.objects.all()
     serializer_class = CourierRegionsSerializer
 
 
 class CourierAPIView(generics.ListCreateAPIView):
+    """Courier view class (methods: GET, POST)."""
+
     queryset = Courier.objects.all()
     serializer_class = CourierSerializer
 
     def post(self, request, *args, **kwargs):
+        """Create new Courier instances and return HTTP_201 or return HTTP_400."""
+
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
         unknown = set(request.data.keys()) - {'data'}
@@ -39,8 +49,10 @@ class CourierAPIView(generics.ListCreateAPIView):
         validation = CourierSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()
-            return JsonResponse(data={'couriers': [{'id': i['courier_id']} for i in validation.validated_data]},
-                                status=201)
+            return JsonResponse(
+                data={'couriers': [{'id': i['courier_id']} for i in validation.validated_data]},
+                status=201
+            )
         errors = []
         for index, error in enumerate(validation.errors):
             if error:
@@ -55,17 +67,23 @@ class CourierAPIView(generics.ListCreateAPIView):
 
 
 class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
+    """Courier detail view (methods: GET, PATCH)."""
+
     queryset = Courier.objects.all()
     serializer_class = CourierSerializer
 
     def get(self, request, *args, **kwargs):
+        """Get courier details (GET /couriers/$courier_id)."""
+
         pk = kwargs['pk']
         if not Courier.objects.filter(courier_id=pk).exists():
             return JsonResponse(data={'error': 'Courier not found'}, status=404)
         courier = Courier.objects.get(courier_id=pk)
         courier_detail = CourierSerializer(instance=courier).data
-        completed_orders = Order.objects.filter(courier_id=courier,
-                                                delivery_complete=True)
+        completed_orders = Order.objects.filter(
+            courier_id=courier,
+            delivery_complete=True
+        )
         min_avg_region_time = 60*60
         regions = completed_orders.order_by('region').values_list('region', flat=True).distinct()
         # yeah I know this looks abysmal why do you ask
@@ -97,6 +115,8 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
         return JsonResponse(data=courier_detail, status=200)
 
     def partial_update(self, request, *args, **kwargs):
+        """Update courier details (PATCH /couriers/$courier_id)."""
+
         pk = kwargs['pk']
         patch_data = request.data
         patch_data['courier_id'] = pk
@@ -111,10 +131,14 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
 
 
 class OrderAPIView(generics.ListCreateAPIView):
+    """Order view (methods: GET, POST)."""
+
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
     def post(self, request, *args, **kwargs):
+        """Create new Order instances and return HTTP_201 or return HTTP_400."""
+
         if 'data' not in request.data.keys():
             JsonResponse({'validation_error': {'data': 'This field is required.'}}, status=400)
         unknown = set(request.data.keys()) - {'data'}
@@ -124,8 +148,10 @@ class OrderAPIView(generics.ListCreateAPIView):
         validation = OrderSerializer(data=request.data['data'], many=True)
         if validation.is_valid():
             validation.save()
-            return JsonResponse(data={'orders': [{'id': i['order_id']} for i in validation.validated_data]},
-                                status=201)
+            return JsonResponse(
+                data={'orders': [{'id': i['order_id']} for i in validation.validated_data]},
+                status=201
+            )
         validation_errors = [i for i in validation.errors if i]
         errors = []
         for index, error in enumerate(validation.errors):
@@ -139,9 +165,13 @@ class OrderAPIView(generics.ListCreateAPIView):
 
 
 class OrderAssignAPIView(generics.CreateAPIView):
+    """Order assign view (methods: POST)"""
+
     serializer_class = OrderAssignSerializer
 
     def post(self, request, *args, **kwargs):
+        """Assign orders to given courier and return HTTP_200 or return HTTP_400"""
+
         if 'courier_id' not in request.data.keys():
             return JsonResponse({'courier_id': 'This field is required.'}, status=400)
         validation = OrderAssignSerializer(data=request.data)
@@ -152,9 +182,13 @@ class OrderAssignAPIView(generics.CreateAPIView):
 
 
 class OrderCompleteAPIView(generics.CreateAPIView):
+    """Order complete view (methods: POST)"""
+
     serializer_class = OrderCompleteSerializer
 
     def post(self, request, *args, **kwargs):
+        """Mark the given order as completed and return HTTP_200 or return HTTP_400"""
+
         validation = OrderCompleteSerializer(data=request.data)
         if validation.is_valid():
             assigned_orders = validation.save()
