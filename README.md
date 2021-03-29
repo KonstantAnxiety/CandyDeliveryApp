@@ -130,7 +130,7 @@ WantedBy=sockets.target
 ```sh
 sudo nano /etc/systemd/system/gunicorn.service
 ```
-Add the folloeing to the file (highlighted lines imply individual information)
+Add the following to the file (highlighted lines imply individual information)
 ```diff
 [Unit]
 Description=gunicorn daemon
