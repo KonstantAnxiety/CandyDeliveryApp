@@ -42,7 +42,7 @@ cd
 mkdir webapp
 cd webapp/
 ```
-* Generate a new rsa key pair and add it to GitHub
+* Generate a new rsa key pair and add the public key to GitHub
 ```console
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
