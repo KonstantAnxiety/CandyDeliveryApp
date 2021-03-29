@@ -43,7 +43,7 @@ mkdir webapp
 cd webapp/
 ```
 * Generate a new rsa key pair and add the public key to GitHub
-```console
+```sh
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
 ```
@@ -72,6 +72,7 @@ postgres=# \q
 ```
 * To let the app interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py``` (highlighted lines imply individual information)
 ```diff
+...
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -83,6 +84,7 @@ DATABASES = {
     }
 
 }
+...
 ```
 * Do not use the secret key from the repo, instead generate a new one for the app with 
 ```sh
