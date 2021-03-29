@@ -1,4 +1,11 @@
-<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+// resets
+s { text-decoration:none; } //strike-through
+em { font-style: normal; font-weight: bold; } //italic emphasis
+
+
+// colors
+s { color: green }
+em { color: blue }
 
 # Candy Delivery REST API
 REST API for candy shop deliveries ([TASK](https://disk.yandex.ru/d/TbWKTZbnOST80Q?w=1)).
@@ -72,11 +79,10 @@ postgres=# GRANT ALL PRIVILEGES ON DATABASE cda_db to sampledbuser;
 postgres=# \q
 ```
 * To let the app to interact with the database make the following changes to ```~/webapp/candydelivery/cda/cda/settings.py```
-<pre>
-    <code class="prettyprint">
 
 DATABASES = {
     'default': {
+        _asdf_
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': '<span style="background-color:yellow">cda_db</span>',
         'USER': '!sampledbuser!',
@@ -88,8 +94,7 @@ DATABASES = {
 }
     <span style="background-color:yellow">int i;</span>
   // Yay code and it has colors
-    </code>
-  </pre>
+
 ```python
 asdf
 ```
