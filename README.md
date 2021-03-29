@@ -15,7 +15,7 @@ The database is more robust then it is needed for the task, e.g. new courier typ
 ![DB diagram](https://user-images.githubusercontent.com/58992437/112771820-63af5200-9036-11eb-948a-b559679def60.png)
 
 ## Deploy
-This instruction describes how to install the app with a new virtual environment, configure PostgreSQL database, Gunicorn as a WSGI HTTP server to listen to requests after reboot or shutdown and nginx as a proxy server on Ubuntu 20.04.2 and assumes that the server has a user with sudo privileges named `user`.
+This instruction describes how to install the app with a new virtual environment, configure PostgreSQL database, Gunicorn as a WSGI HTTP server to listen to requests on bootup and nginx as a proxy server on Ubuntu 20.04.2 and assumes that the server has a user with sudo privileges named `user`.
 
 ### Install packages
 * Install python3
