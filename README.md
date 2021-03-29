@@ -10,7 +10,7 @@ REST API for candy shop deliveries ([TASK](https://disk.yandex.ru/d/TbWKTZbnOST8
 * nginx
 
 ## Database diagram
-The database is more robust then it is needed for the task, e.g. new courier types can be added to the reference table CourierType
+The database is more robust then it is needed for the task, e.g. new courier types can be added to the reference table CourierType.
 
 ![DB diagram](https://user-images.githubusercontent.com/58992437/112771820-63af5200-9036-11eb-948a-b559679def60.png)
 
@@ -143,7 +143,7 @@ Group=www-data
 !WorkingDirectory=/home/user/webapp/candydelivery/cda
 !ExecStart=/home/user/webapp/candydelivery/venv/bin/gunicorn \
           --access-logfile - \
-!          --workers !9! \
+!          --workers 9 \
           --bind unix:/run/gunicorn.sock \
           cda.wsgi:application
 
