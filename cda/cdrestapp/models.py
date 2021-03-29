@@ -20,7 +20,7 @@ class Courier(models.Model):
     related to :model:`CourierType`.
     """
 
-    courier_id = models.IntegerField(primary_key=True)
+    courier_id = models.IntegerField(primary_key=True, validators=[MinValueValidator(1)])
     courier_type = models.ForeignKey(CourierType, on_delete=models.CASCADE)
     earnings = models.IntegerField(default=0)
 
