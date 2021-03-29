@@ -42,7 +42,7 @@ cd
 mkdir webapp
 cd webapp/
 ```
-* Generate a new rsa key pair and add it to GitHub
+* Generate a new rsa key pair and add the public key to GitHub
 ```console
 ssh-keygen
 cat ~/.ssh/id_rsa.pub
@@ -130,7 +130,7 @@ WantedBy=sockets.target
 ```sh
 sudo nano /etc/systemd/system/gunicorn.service
 ```
-Add the folloeing to the file (highlighted lines imply individual information)
+Add the following to the file (highlighted lines imply individual information)
 ```diff
 [Unit]
 Description=gunicorn daemon
@@ -231,3 +231,16 @@ python3 manage.py test
 coverage run manage.py test
 coverage report
 ```
+ ## Comments for backend-school
+ The app features several more useful endpoints aside from the task, e.g.
+ * `GET /courier-types` – list of all courier-types
+ * `POST /courier-types` – add a new courier type, e.g.
+ ```json
+{
+    "courier_type": "scooter",
+    "capacity": "10",
+    "earnings_coef": 7
+}
+ ```
+ * `GET /couriers` – list of all couriers
+ * `GET /orders` – list of all orders
