@@ -241,7 +241,7 @@ coverage report
 ```
  ## Comments for backend-school
  The app features several more useful endpoints aside from the task, e.g.
- * `GET /courier-types` – list of all courier-types
+ * `GET /courier-types` – list of all courier types
  * `POST /courier-types` – add a new courier type, e.g.
  ```json
 {
