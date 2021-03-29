@@ -252,3 +252,5 @@ coverage report
  ```
  * `GET /couriers` – list of all couriers
  * `GET /orders` – list of all orders
+
+Wow I wanted to take a look at my code for the last time and I've just noticed that I forgot to validate that courier_id is positive. I do not want to leave it like that so I hope that you can find it in your heart to forgive me and let me fix this at least in the repo, besides it is just a line :(
