@@ -38,7 +38,7 @@ class CourierRegionsSerializer(ModelSerializer):
         """Save a new instance to the database."""
 
         region = CourierRegions.objects.create(
-            courier_id=Courier.objects.get(courier_id=validated_data['courier_id']),
+            courier_id=validated_data['courier_obj'],  # Courier.objects.get(courier_id=validated_data['courier_id']),
             region=validated_data['region']
         )
         return region
@@ -74,7 +74,7 @@ class WorkingHoursSerializer(ModelSerializer):
         """Save a new instance to the database."""
 
         w_h = WorkingHours.objects.create(
-            courier_id=Courier.objects.get(courier_id=validated_data['courier_id']),
+            courier_id=validated_data['courier_obj'],  # Courier.objects.get(courier_id=validated_data['courier_id']),
             work_start=validated_data['working_hours'][:5],
             work_end=validated_data['working_hours'][6:]
         )
@@ -157,6 +157,7 @@ class CourierSerializer(ModelSerializer):
         for region in validated_data['regions']:
             new_region = CourierRegionsSerializer(data={
                 'courier_id': validated_data['courier_id'],
+                'courier_obj': validated_data['courier_obj'],
                 'region': region
             })
             if not new_region.is_valid():
@@ -170,6 +171,7 @@ class CourierSerializer(ModelSerializer):
         for w_h in validated_data['working_hours']:
             new_w_h = WorkingHoursSerializer(data={
                 'courier_id': validated_data['courier_id'],
+                'courier_obj': validated_data['courier_obj'],
                 'working_hours': w_h
             })
             if not new_w_h.is_valid():
@@ -184,6 +186,7 @@ class CourierSerializer(ModelSerializer):
             courier_type=validated_data['courier_type']
         )
         new_courier.save()
+        validated_data['courier_obj'] = new_courier
         self.save_hours(validated_data)
         self.save_regions(validated_data)
         return new_courier

@@ -2,6 +2,9 @@ from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.settings import api_settings
 
+from silk.profiling.profiler import silk_profile
+from memory_profiler import profile
+
 from .models import CourierType, CourierRegions, Courier, Order
 from .serializers import CourierTypeSerializer, CourierRegionsSerializer, \
     OrderAssignSerializer, OrderCompleteSerializer, \
@@ -23,6 +26,9 @@ class CourierTypeAPIView(generics.ListCreateAPIView):
             return JsonResponse(validation.validated_data, status=201)
         return JsonResponse({'validation_error': validation.errors}, status=400)
 
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class CourierRegionsAPIView(generics.ListCreateAPIView):
     """CourierRegions view class."""
@@ -37,6 +43,8 @@ class CourierAPIView(generics.ListCreateAPIView):
     queryset = Courier.objects.all()
     serializer_class = CourierSerializer
 
+    # @silk_profile(name='Post couriers')
+    # @profile
     def post(self, request, *args, **kwargs):
         """
         Create new Courier instances and
@@ -77,7 +85,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
 
     def get(self, request, *args, **kwargs):
         """Get courier details (GET /couriers/$courier_id)."""
-
+        
         pk = kwargs['pk']
         if not Courier.objects.filter(courier_id=pk).exists():
             return JsonResponse(data={'error': 'Courier not found'}, status=404)
@@ -115,6 +123,7 @@ class CourierDetailAPIView(generics.RetrieveUpdateAPIView):
             courier_detail['rating'] = round((60*60 - min_avg_region_time)/60/60 * 5, 2)
 
         courier_detail['earnings'] = courier.earnings
+
         return JsonResponse(data=courier_detail, status=200)
 
     def partial_update(self, request, *args, **kwargs):

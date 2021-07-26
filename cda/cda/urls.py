@@ -1,5 +1,6 @@
+from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from cdrestapp import views
 
 urlpatterns = [
@@ -11,3 +12,5 @@ urlpatterns = [
 	re_path(r'^orders', views.OrderAPIView.as_view(), name='orders-list'),
 	re_path(r'^courier-types', views.CourierTypeAPIView.as_view(), name='courier-types-list'),
 ]
+
+urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
